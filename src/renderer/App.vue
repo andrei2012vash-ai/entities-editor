@@ -230,27 +230,32 @@
         })
 
         glob(path + '/**/*.entities', function (er, files) {
-          var filesGroup = new Map()
-          for (let file of files) {
-            let pieces = file.split('/')
-            var name = pieces[pieces.length - 1].replace(/\.entities$/, '')
-            var group = pieces[pieces.length - 4]
-
-            if (!filesGroup.has(group)) {
-              filesGroup.set(group, [{name: name, path: file}])
-            } else {
-              var currentItems = filesGroup.get(group)
-              currentItems.push({name: name, path: file, edited: false})
-              filesGroup.set(group, currentItems)
-            }
-          }
-
-          model.files = [ ...filesGroup ]
-          setTimeout(() => {
+          if (er) {
+            remote.dialog.showErrorBox('Entities Editor', er.toString())
             model.loading = false
-            model.menu = false
-            model.filesList = true
-          }, model.files.length * 40)
+          } else {
+            var filesGroup = new Map()
+            for (let file of files) {
+              let pieces = file.split('/')
+              var name = pieces[pieces.length - 1].replace(/\.entities$/, '')
+              var group = pieces[pieces.length - 4]
+
+              if (!filesGroup.has(group)) {
+                filesGroup.set(group, [{name: name, path: file}])
+              } else {
+                var currentItems = filesGroup.get(group)
+                currentItems.push({name: name, path: file, edited: false})
+                filesGroup.set(group, currentItems)
+              }
+            }
+
+            model.files = [ ...filesGroup ]
+            setTimeout(() => {
+              model.loading = false
+              model.menu = false
+              model.filesList = true
+            }, model.files.length * 40)
+          }
         })
       },
       editFile (item) {
